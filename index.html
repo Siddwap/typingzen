@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sd Typing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+
+    <!-- Hindi Inscript: Mangal / Noto Sans Devanagari fallback -->
+    <style>
+      @font-face {
+        font-family: 'MangalCustom';
+        /* prefer local Mangal; fallback to Noto Devanagari webfont */
+        src: local('Mangal'), local('Mangal Regular'),
+             url('https://fonts.gstatic.com/s/notosansdevanagari/v15/NotoSansDevanagari-Regular.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+      }
+      /* class to apply Hindi font to paragraph and textarea when Hindi selected */
+      .hindi-area {
+        font-family: 'MangalCustom', 'Noto Sans Devanagari', 'Mangal', serif !important;
+        /* keep normal direction (Devanagari is LTR) */
+        direction: ltr;
+        /* slightly larger for visibility */
+        font-size: 1.05rem;
+      }
+      /* small helper for highlighted word styling consistent with original UI */
+      .hilight-word { padding: 0 2px; }
+    </style>
+  </head>
+  <body style="background-color: aliceblue;">
+    <div class="fluid-container">
+        <nav class="navbar bg-primary">
+            <div class="container-fluid">
+              <a class="navbar-brand fs-2 text-white">Sd Typing</a>
+              <div class="bg-white rounded" id="backSpaceBox">
+                <div class="form-check ms-5 me-5">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" checked>
+                    <label class="form-check-label" for="flexRadioDefault1">
+                      Backspace Enabled
+                    </label>
+                  </div>
+                  <div class="form-check ms-5 me-5">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" onclick="oneWordBackspace()">
+                    <label class="form-check-label" for="flexRadioDefault2">
+                      One Word Backspace
+                    </label>
+                  </div>
+                  <div class="form-check ms-5 me-5">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3" onclick="backspaceDisable()">
+                    <label class="form-check-label" for="flexRadioDefault3">
+                      Backspace Disabled
+                    </label>
+                  </div>
+              </div>
+              <div class="d-flex" role="search">
+                <!-- NEW: language select before paragraph select -->
+                <select id="lang" class="form-select me-2" aria-label="Select Language">
+                  <option value="" disabled selected>Select Language</option>
+                  <option value="english">English</option>
+                  <option value="hindi">Hindi</option>
+                </select>
+
+                <select id="data" class="form-select" aria-label="Select Paragraph">
+                    <option value="" disabled selected>Select Paragraph</option>
+                    <!-- options will be populated dynamically based on chosen language -->
+                </select>
+                  <button id="start" class="btn btn-success btn-lg">Start</button>
+              </div>
+            </div>
+          </nav>
+        <div id="main" class="container-fluid mt-4">
+            <div class="row g-5">
+                <div class="col-lg-9 col-md-12 ">
+                    <div class="row">
+                        <div class="col-12 bg-primary border rounded-3 text-center text-white fs-5 p-2">Paragraph Title</div>
+                    </div>
+                    <div class="container-fluid shadow p-3 mt-3 mb-5 bg-body-tertiary rounded" style="height:500px;">
+                        <div class="row">
+                            <div id="para" class="col-12 border rounded-3 overflow-auto fs-5 p-3" style="height:200px;"></div>
+                            <div class="col-12 mt-1" style="height:200px;"><textarea id="textarea" class="w-100 h-100 fs-5" style="cursor: not-allowed;" disabled spellcheck="false"></textarea></div>
+                            <div class="col-12 mt-3"><button id="submit" class="btn btn-lg btn-danger disabled">Submit</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-12 shadow p-3 mb-5 bg-body-tertiary rounded">
+                    <div class="row mt-5 justify-content-evenly border shadow p-3 mb-5 bg-body-tertiary rounded">
+                        <div class="col-12 fs-2 text-center">Time</div>
+                        <div id="minute" class="col-5 fs-3 text-center bg-primary rounded text-white">15</div>
+                        <div id="second" class="col-5 fs-3 text-center bg-warning rounded text-white">00</div>
+                    </div>
+                    <div>Paragraph Complete...</div>
+                    <div class="progress">
+                        <div id="progress" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%">0%</div>
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="result" class="container d-none shadow p-3 mb-5 bg-body-tertiary rounded fs-4">
+            <div class="row">
+                <div class="col-12 bg-success text-white">Your Test Submitted Sucessfully. Here Are Your Details</div>
+                <div class="col-12">
+                    <div>Result</div>
+                    <div>Gross Speed : <span id="gSpeed">00</span> WPM</div>
+                    <div>Net Speed : <span id="nSpeed">00</span> WPM</div>
+                    <div>Acuracy : <span id="acu">00</span> %</div>
+                    <div>Totle Words : <span id="toWord">00</span></div>
+                    <div>Typed Words : <span id="tyWord">00</span></div>
+                    <div>Wrong Words : <span id="wWord">00</span></div>
+                    <div>Totle KeyStrokes : <span id="toKey">00</span></div>
+                    <div>Totle Time : <span id="toTime">00</span> Minutes</div>
+                    <div>Taken Time : <span id="taTime">00</span></div>
+                </div>
+                <div><button class="btn btn-lg btn-warning text-white" onclick="location.reload()">Start Test Again</button></div>
+            </div>
+          </div>
+    </div>
+    <script src="script2.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+  </body>
+</html>
