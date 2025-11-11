@@ -1,6 +1,6 @@
 [
   {
-    "name": "testing name"
+    "name": "testing name",
     "data": "testing data"
   },
   {
