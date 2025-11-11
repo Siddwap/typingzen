@@ -1,8 +1,8 @@
 // script2.js - updated to load paragraphs from language-specific APIs
 // Keeps your original UI/IDs intact and only injects language selection + Hindi font class handling
 
-const englishUrl = "https://raw.githubusercontent.com/Siddwap/Typing/refs/heads/main/englishdata.txt";
-const hindiUrl = "https://raw.githubusercontent.com/Siddwap/Typing/refs/heads/main/hindidata.txt";
+const englishUrl = "https://raw.githubusercontent.com/Siddwap/typingzen/refs/heads/main/englishdata.txt";
+const hindiUrl = "https://raw.githubusercontent.com/Siddwap/typingzen/refs/heads/main/hindidata.txt";
 
 // state
 let apiData = []; // array of {name, data}
