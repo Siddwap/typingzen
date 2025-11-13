@@ -1,12 +1,9 @@
-// script2.js - updated to load paragraphs from language-specific APIs
-// Keeps your original UI/IDs intact and only injects language selection + Hindi font class handling
+// script2.js - updated to fetch from live API using language + date
+const apiBase = "https://typingdata.testingsd9.workers.dev";
 
-const englishUrl = "https://raw.githubusercontent.com/Siddwap/typingzen/refs/heads/main/englishdata.txt";
-const hindiUrl = "https://raw.githubusercontent.com/Siddwap/typingzen/refs/heads/main/hindidata.txt";
-
-// state
-let apiData = []; // array of {name, data}
-let currentLang = ""; // "english" or "hindi"
+let apiData = [];
+let currentLang = "";
+let langCode = null;
 
 let start = document.querySelector("#start");
 let submit = document.querySelector("#submit");
@@ -25,57 +22,69 @@ let wrongWord = 0;
 let totalWord = 0;
 let toKey = 0;
 
-// elements
 const langSelect = document.querySelector("#lang");
+const datePicker = document.querySelector("#datePicker");
 const dataSelect = document.querySelector("#data");
 const paraBox = document.querySelector("#para");
 const textarea = document.querySelector("#textarea");
 
-// --- Language change: load appropriate API and populate paragraphs ---
-langSelect.addEventListener("change", async function () {
-  const lang = this.value;
-  currentLang = lang;
-  // clear previous
+// --- Language select ---
+langSelect.addEventListener("change", function () {
+  currentLang = this.value;
+  langCode = currentLang === "hindi" ? 3 : 1;
   apiData = [];
   dataSelect.innerHTML = '<option value="" disabled selected>Select Paragraph</option>';
   paraBox.innerHTML = "";
   textarea.value = "";
   textarea.disabled = true;
   textarea.style.cursor = "not-allowed";
-  // remove hindi-area class by default
   paraBox.classList.remove("hindi-area");
   textarea.classList.remove("hindi-area");
 
-  try {
-    const url = lang === "hindi" ? hindiUrl : englishUrl;
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error("Network response not ok: " + resp.status);
-    const json = await resp.json();
-
-    // store
-    apiData = Array.isArray(json) ? json : [];
-
-    // populate select with names (name shown, index as value)
-    apiData.forEach((item, idx) => {
-      const opt = document.createElement("option");
-      opt.value = idx; // index in apiData
-      opt.textContent = item.name || `Para ${idx + 1}`;
-      dataSelect.appendChild(opt);
-    });
-
-    // If hindi selected, add hindi-area class to selects? (we only style para and textarea)
-    if (lang === "hindi") {
-      // hint: actual Devanagari input depends on user's OS/keyboard (Inscript) — we apply font styling
-      paraBox.classList.add("hindi-area");
-      textarea.classList.add("hindi-area");
-    }
-  } catch (err) {
-    console.error("Failed to load data for", lang, err);
-    alert("Unable to load paragraphs for the selected language. Please try again later.");
+  if (currentLang === "hindi") {
+    paraBox.classList.add("hindi-area");
+    textarea.classList.add("hindi-area");
   }
 });
 
-// --- Load the chosen paragraph into the para box ---
+// --- When user chooses date, fetch API based on language + date ---
+datePicker.addEventListener("change", async function () {
+  const dateVal = this.value;
+  if (!currentLang || !langCode) {
+    alert("Please select a language first.");
+    datePicker.value = "";
+    return;
+  }
+  if (!dateVal) return;
+
+  dataSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+
+  try {
+    const url = `${apiBase}?language=${langCode}&created_at=${dateVal}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error("Network error: " + resp.status);
+    const json = await resp.json();
+    apiData = Array.isArray(json) ? json : [];
+
+    dataSelect.innerHTML = '<option value="" disabled selected>Select Paragraph</option>';
+
+    apiData.forEach((item, idx) => {
+      const opt = document.createElement("option");
+      opt.value = idx;
+      let diffClass = "";
+      if (item.difficulty === "H") diffClass = "diff-H";
+      else if (item.difficulty === "M") diffClass = "diff-M";
+      else diffClass = "diff-E";
+      opt.innerHTML = `<span class="${diffClass}">${item.difficulty}</span> ${item.title}`;
+      dataSelect.appendChild(opt);
+    });
+  } catch (err) {
+    console.error(err);
+    alert("Failed to load data. Please try again later.");
+  }
+});
+
+// --- Load chosen paragraph ---
 function getData() {
   const pn = dataSelect.value;
   if (pn === "" || pn == null) {
@@ -83,48 +92,32 @@ function getData() {
     return;
   }
   const idx = parseInt(pn, 10);
-  const paraText = apiData[idx].data || "";
+  const paraText = apiData[idx].passage_text || "";
   toKey = paraText.split("").length;
   let arr = paraText.split(" ");
   totalWord = arr.length;
-
-  // create spans similar to original behavior
-  arr = arr.map((val) => {
-    return `<span class="hilight-word">` + val + `</span>`;
-  });
+  arr = arr.map((val) => `<span class="hilight-word">${val}</span>`);
   paraBox.innerHTML = arr.join(" ");
-
-  // Put a highlight on the first word to guide user
   const first = paraBox.querySelector(".hilight-word");
-  if (first) {
-    first.classList.add("bg-warning", "scrl");
-  }
+  if (first) first.classList.add("bg-warning", "scrl");
 }
+function getDataWrapper() { getData(); }
 
-// provide backward-compatibility function name used in original HTML
-function getDataWrapper() {
-  getData();
-}
-
-// --- Backspace behavior functions (same names as original) ---
+// --- Backspace behavior ---
 function oneWordBackspace() {
   textarea.addEventListener("keydown", (e) => {
     preventOneWordBackspace(e);
   });
 }
-
 function backspaceDisable() {
   textarea.addEventListener("keydown", (e) => {
-    if (e.keyCode == 8 || e.keyCode == 46) {
-      e.preventDefault();
-    }
+    if (e.keyCode == 8 || e.keyCode == 46) e.preventDefault();
   });
 }
 
-// --- Typing logic (space detection / marking words) ---
+// --- Typing logic ---
 textarea.addEventListener("keypress", (e) => {
-  // keyCode deprecated but kept for compatibility; use which/charCode if needed
-  if (e.keyCode == 32) { // space pressed
+  if (e.keyCode == 32) {
     let hilight = document.querySelectorAll(".hilight-word");
     let para = document.querySelector("#para").innerText;
     let paraArr = para.split(" ");
@@ -136,7 +129,6 @@ textarea.addEventListener("keypress", (e) => {
       if (paraArr[i] == textArr[i]) {
         temp1.push(textArr[i]);
         rightWord = temp1.length;
-        // mark correct and move highlight
         if (hilight[i]) hilight[i].classList.add("text-success");
         if (hilight[i + 1]) hilight[i + 1].classList.add("bg-warning", "scrl");
         if (hilight[i]) hilight[i].classList.remove("bg-warning", "scrl");
@@ -148,17 +140,11 @@ textarea.addEventListener("keypress", (e) => {
         if (hilight[i]) hilight[i].classList.remove("bg-warning", "scrl");
       }
     }
-
     let totleEnter = textArr.length;
     let p = parseInt((totleEnter * 100) / totalWord);
     document.querySelector("#progress").style.width = p + "%";
     document.querySelector("#progress").innerText = p + "%";
-
-    if (totleEnter == totalWord - 1) {
-      submit.click();
-    }
-
-    // auto-scroll paragraph to keep current word in view
+    if (totleEnter == totalWord - 1) submit.click();
     const scrEl = document.querySelector(".scrl");
     if (scrEl) {
       let scrTp = scrEl.offsetTop - document.querySelector("#para").offsetTop;
@@ -182,18 +168,11 @@ function timeCheck() {
       clearInterval(t);
       submit.click();
     }
-    submit.addEventListener("click", () => {
-      clearInterval(t);
-    });
-    document.querySelector("#textarea").addEventListener("blur", () => {
-      clearInterval(t);
-    });
+    submit.addEventListener("click", () => clearInterval(t));
+    document.querySelector("#textarea").addEventListener("blur", () => clearInterval(t));
   }, 1000);
 }
-
-document.querySelector("#textarea").addEventListener("focus", () => {
-  timeCheck();
-});
+document.querySelector("#textarea").addEventListener("focus", () => timeCheck());
 
 // --- Speed calculation ---
 function speedCal() {
@@ -205,28 +184,17 @@ function speedCal() {
   if (accuracy < 0) accuracy = 0;
 }
 
-// --- Start button behavior ---
+// --- Start button ---
 start.addEventListener("click", () => {
-  // ensure language chosen and paragraph chosen
-  if (!currentLang) {
-    alert("Please choose a language first.");
-    return;
-  }
-  if (!dataSelect.value) {
-    alert("Please select a paragraph.");
-    return;
-  }
-
+  if (!currentLang) return alert("Please choose a language first.");
+  if (!dataSelect.value) return alert("Please select a paragraph.");
   getData();
-
   textarea.disabled = false;
   textarea.style.cursor = "auto";
   submit.classList.remove("disabled");
   start.classList.add("disabled");
   dataSelect.classList.add("d-none");
   document.querySelector("#backSpaceBox").classList.add("d-none");
-
-  // ensure Hindi font class is applied when Hindi selected
   if (currentLang === "hindi") {
     paraBox.classList.add("hindi-area");
     textarea.classList.add("hindi-area");
@@ -234,8 +202,6 @@ start.addEventListener("click", () => {
     paraBox.classList.remove("hindi-area");
     textarea.classList.remove("hindi-area");
   }
-
-  // reset counters in case of restart
   givenTime = totalTime;
   takenTime = 0;
   rightWord = 0;
@@ -265,44 +231,23 @@ submit.addEventListener("click", () => {
   document.querySelector("#start").classList.add("d-none");
 });
 
-// --- Disable Copy / Paste (same as original) ---
+// --- Disable Copy / Paste ---
 document.onkeydown = function (e) {
-  if (
-    e.ctrlKey &&
-    (e.keyCode === 67 ||
-      e.keyCode === 86 ||
-      e.keyCode === 85 ||
-      e.keyCode === 117)
-  ) {
+  if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 85 || e.keyCode === 117)) {
     alert("not allowed");
     return false;
-  } else {
-    return true;
-  }
+  } else return true;
 };
+window.addEventListener("contextmenu", (e) => e.preventDefault(), false);
 
-window.addEventListener(
-  "contextmenu",
-  function (e) {
-    e.preventDefault();
-  },
-  false
-);
-
-// --- prevent one word backspace logic (same as original) ---
+// --- prevent one word backspace ---
 function preventOneWordBackspace(e) {
   var text = document.querySelector("textarea").value;
   var evt = e || window.event;
   if (evt) {
     var keyCode = evt.charCode || evt.keyCode;
     if ((keyCode === 8 || keyCode === 46) && text[text.length - 1] == " ") {
-      if (evt.preventDefault) {
-        evt.preventDefault();
-      } else {
-        evt.returnValue = false;
-      }
-    } else {
-      // allow
+      evt.preventDefault ? evt.preventDefault() : (evt.returnValue = false);
     }
   }
 }
