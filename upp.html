@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sd Typing Test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@500&family=Kumbh+Sans&family=Ranchers&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kufam:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mangal&display=swap" rel="stylesheet">
+
+    <style>
+        *{ padding:0; margin:0; box-sizing:border-box; }
+        body{ margin:-15px; }
+
+        .main{
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            margin:0px;
+        }
+
+        .content{ text-align:center; margin:-33px; }
+
+        #message{
+            user-select:none;
+            overflow-y:auto; /* ensure display box scrolls if needed */
+            max-height:300px;
+        }
+
+        #text{
+            font-size:20px;
+            width:85%;
+            resize:vertical;
+            overflow-y:auto; /* ✅ vertical scrollbar */
+            max-height:250px;
+            line-height:22px;
+            padding:5px;
+            font-family:'Times New Roman', Times, serif;
+            background-color:#CCFF66;
+        }
+
+        textarea:focus{
+            animation:border-color-change 10s linear infinite forwards;
+        }
+
+        select, textarea { font-family:'Times New Roman', Times, serif; }
+
+        /* Hindi font applied dynamically */
+        .hindi-text, .hindi-typing {
+            font-family:'Mangal', sans-serif !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main my-5" id="main1">
+        <div class="content container-fluid">
+            <div style="height:105px; padding:5px; background-color:#295d9c; cursor:no-drop; font-family:'Times New Roman', Times, serif;" oncontextmenu="return false">
+                <div style="width:45%; position:relative; float:left;" oncontextmenu="return false">
+                    <table width="100%">
+                        <tr>
+                            <td style="padding-left:20px; width:90px"><img src="NTA_logo_1.png" style="height:99px"></td>
+                            <td style="font-size:32px; font-weight:bold; text-align:left; line-height:35px; color:#FFFFFF; padding-left:20px; padding-top:10px; text-shadow:2px 2px 5px #000000;">
+                                Typing Test<br><span style='font-size:16px;'>Exam Center : UPSI-LUCKNOW</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="position:relative; float:left; width:90px;" oncontextmenu="return false">
+                    <img src="12345.jpg" style="height:90px; width:85px; border-radius:15px; border:solid 1px #CCCCCC;">
+                </div>
+
+                <div style="width:30%; padding:8px; font-size:16px; text-shadow:2px 2px 3px #000000; line-height:22px; position:relative; float:left;" oncontextmenu="return false">
+                    <table style="color:#FFFFFF" cellpadding="1" cellspacing="0">
+                        <tr><td>Registration No </td><td>:</td><td>11722</td></tr>
+                        <tr><td>Candidate Name </td><td>:</td><td>Dummy_11722</td></tr>
+                        <tr><td>Father's Name</td><td>:</td><td>XXXX_XXX</td></tr>
+                        <tr><td>Exam Date & Time </td><td>:</td><td>30-09-2022 || 10:00 AM</td></tr>  
+                    </table>    
+                </div>
+
+                <div style="position:relative; float:left;padding-top:15px; font-size:28px; font-weight:bold; color:#FFFFFF; text-shadow:2px 2px 3px #000000; text-align:center; width:15%;" id="timer" oncontextmenu="return false"></div>
+            </div>
+
+            <div style="width:99%; padding-top:5px;">
+                <!-- Language Selector -->
+                <select id="language" style="margin-left:30px;">
+                    <option disabled selected>Select Language</option>
+                    <option value="english">English</option>
+                    <option value="hindi">Hindi</option>
+                </select>
+
+                <!-- Paragraph Selector -->
+                <select id="data" style="margin-left:30px;" disabled>
+                    <option disabled selected>Select Paragraph</option>
+                </select>
+
+                <table width="100%">
+                    <tr><td>
+                        <div id="message" style="cursor:no-drop; text-align:left; line-height:25px; font-size:20px; padding:5px;"></div>
+                        <div style="width:100%; text-align:center;">
+                            <textarea spellcheck="false" rows="8" name="txtData" id="text" 
+                                onKeyDown="heightlite()" oncontextmenu="return false" 
+                                ondrop="return false" onpaste="return false" 
+                                oncopy="return false" onMouseUp="return false" 
+                                spellcheck="false" autofocus></textarea>
+                        </div>
+                        <div style="height:45px; width:100%; position:relative; float:right; font-size:20px; line-height:40px; padding-left:0px;" align="center" oncontextmenu="return false"></div> 
+                    </td></tr>
+                    <tr>
+                        <td>
+                            <button class="btn btn-light px-4" id="start-btn" style="font-size:25px;">Start</button>
+                            <div id="result" class="mt-2 pt-2 text-center">
+                                <h4 class="text-dark"></h4>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>
