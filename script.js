@@ -112,28 +112,49 @@ function openFullscreen() {
 }
 
 function heightlite() {
-  var para = document.getElementById("data").value;
-  var pass = para.split(" ");
+  // helper: escape HTML so Devanagari/punctuation are safe to inject
+  function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+  }
+
+  // get passage text from the select (value contains passage_text)
+  var paraRaw = document.getElementById("data").value || "";
+  // remove zero-width joiner/ non-joiner that may confuse splitting
+  var paraClean = paraRaw.replace(/\u200C|\u200D/g, "").trim();
+
+  if (!paraClean) {
+    document.getElementById("message").innerHTML = "";
+    return;
+  }
+
+  // split on any unicode whitespace to be robust
+  var pass = paraClean.split(/\s+/u);
   var len = pass.length;
-  var msg = "";
-  var typ = document.getElementById("text").value;
-  var typPara1 = typ.split(" ");
-  var typPara = [];
-  for (var i = 0; i < typPara1.length; i++) {
-    if (typPara1[i]) typPara.push(typPara1[i]);
-  }
-  var typLen = (typPara.length - 1);
-  if (typLen >= 0) {
-    msg = "<font color='#0000EE'>";
-  }
-  for (w = 0; w < len; w++) {
-    msg = msg + " " + pass[w];
-    if (typLen == w) {
-      msg = msg + "</font>";
+
+  // get typed text and normalize similarly
+  var typRaw = document.getElementById("text").value || "";
+  var typClean = typRaw.replace(/\u200C|\u200D/g, "").trim();
+  var typPara = typClean ? typClean.split(/\s+/u).filter(Boolean) : [];
+  var typLen = typPara.length - 1;
+
+  // build output with the current word wrapped in a blue span
+  var out = "";
+  for (var i = 0; i < len; i++) {
+    var wordEscaped = escapeHtml(pass[i]);
+    if (i === typLen && typLen >= 0) {
+      out += " " + "<span style='color:#0000EE'>" + wordEscaped + "</span>";
+    } else {
+      out += " " + wordEscaped;
     }
   }
-  document.getElementById("message").innerHTML = msg;
+
+  document.getElementById("message").innerHTML = out.trim();
 }
+
 
 $(document).ready(function () {
   let button = document.getElementById("start-btn");
