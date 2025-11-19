@@ -28,6 +28,13 @@ const dataSelect = document.querySelector("#data");
 const paraBox = document.querySelector("#para");
 const textarea = document.querySelector("#textarea");
 
+function convertToStraightQuotes(str) {
+  return str
+    .replace(/[“”]/g, '"')  // double curly → straight
+    .replace(/[‘’]/g, "'"); // single curly → straight
+}
+
+
 // --- Language select ---
 langSelect.addEventListener("change", function () {
   currentLang = this.value;
@@ -92,7 +99,8 @@ function getData() {
     return;
   }
   const idx = parseInt(pn, 10);
-  const paraText = apiData[idx].passage_text || "";
+  const paraTextapi = apiData[idx].passage_text || "";
+  const paraText = convertToStraightQuotes(paraTextapi)
   toKey = paraText.split("").length;
   let arr = paraText.split(" ");
   totalWord = arr.length;
