@@ -62,9 +62,17 @@ document.getElementById("datePicker").addEventListener("change", async function 
   }
 });
 
+function convertToStraightQuotes(str) {
+  return str
+    .replace(/[“”]/g, '"')  // double curly → straight
+    .replace(/[‘’]/g, "'"); // single curly → straight
+}
+
+
 // STEP 3: Load Passage Text
 document.getElementById("data").addEventListener("change", function () {
-  const passage = this.value;
+  const passageTxt = this.value;
+  const passage = convertToStraightQuotes(passageTxt)
   document.getElementById("message").innerHTML = passage;
 });
 
