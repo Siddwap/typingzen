@@ -68,11 +68,21 @@ function convertToStraightQuotes(str) {
     .replace(/[‘’]/g, "'"); // single curly → straight
 }
 
+function fixNukta(str) {
+  return str
+    .replace(/ड़/g, "ड़")
+    .replace(/ढ़/g, "ढ़")
+    .replace(/ड़्/g, "ड़")
+    .replace(/ढ़्/g, "ढ़");
+}
+
+
 
 // STEP 3: Load Passage Text
 document.getElementById("data").addEventListener("change", function () {
   const passageTxt = this.value;
-  const passage = convertToStraightQuotes(passageTxt)
+  const nuktaText = convertToStraightQuotes(passageTxt)
+  const passage = fixNukta(nuktaText)
   document.getElementById("message").innerHTML = passage;
 });
 
