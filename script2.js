@@ -34,6 +34,15 @@ function convertToStraightQuotes(str) {
     .replace(/[‘’]/g, "'"); // single curly → straight
 }
 
+function fixNukta(str) {
+  return str
+    .replace(/ड़/g, "ड़")
+    .replace(/ढ़/g, "ढ़")
+    .replace(/ड़्/g, "ड़")
+    .replace(/ढ़्/g, "ढ़");
+}
+
+
 
 // --- Language select ---
 langSelect.addEventListener("change", function () {
@@ -100,7 +109,8 @@ function getData() {
   }
   const idx = parseInt(pn, 10);
   const paraTextapi = apiData[idx].passage_text || "";
-  const paraText = convertToStraightQuotes(paraTextapi)
+  const nuktaText = convertToStraightQuotes(paraTextapi)
+  const paraText = fixNukta(nuktaText)
   toKey = paraText.split("").length;
   let arr = paraText.split(" ");
   totalWord = arr.length;
