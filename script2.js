@@ -34,13 +34,20 @@ function convertToStraightQuotes(str) {
     .replace(/[‘’]/g, "'"); // single curly → straight
 }
 
+// function fixNukta(str) {
+//   return str
+//     .replace(/ड़/g, "ड़")
+//     .replace(/ढ़/g, "ढ़")
+//     .replace(/ड़्/g, "ड़")
+//     .replace(/ढ़्/g, "ढ़");
+// }
+
 function fixNukta(str) {
   return str
-    .replace(/ड़/g, "ड़")
-    .replace(/ढ़/g, "ढ़")
-    .replace(/ड़्/g, "ड़")
-    .replace(/ढ़्/g, "ढ़");
+    .replace(/\u095C/g, "\u0921\u093C")  // ड़  → ड + ़
+    .replace(/\u095D/g, "\u0922\u093C"); // ढ़  → ढ + ़
 }
+
 
 
 
